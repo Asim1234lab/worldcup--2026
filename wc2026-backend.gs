@@ -72,6 +72,8 @@ function handleSaveState(body) {
   if (!row) {
     const sub = incoming.submitted === true;
     sh.appendRow([phone, name || 'Player', sub, sub ? new Date() : '', JSON.stringify(incoming)]);
+    // store phone as plain text so leading zeros aren't lost (Sheets would coerce "0501..." to a number)
+    sh.getRange(sh.getLastRow(), 1).setNumberFormat('@').setValue(phone);
     return { ok: true, created: true };
   }
 
@@ -187,6 +189,7 @@ function maskPhone(p) { p = String(p); return p.length > 4 ? '\u2022\u2022\u2022
 function initSheet() {
   const u = getSheet(CONFIG.SHEETS.USERS);
   if (u.getLastRow() === 0) u.appendRow(['phone', 'name', 'submitted', 'submitted_at', 'data_json']);
+  u.getRange(1, 1, u.getMaxRows(), 1).setNumberFormat('@'); // phone column = plain text (preserve leading zeros / + signs)
   const r = getSheet(CONFIG.SHEETS.RESULTS);
   if (r.getLastRow() === 0) r.appendRow(['match', 'round', 'actual_winner']);
 }
