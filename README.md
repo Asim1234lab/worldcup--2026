@@ -2,7 +2,8 @@
 
 A single-page web app where friends predict the **entire FIFA World Cup 2026** — group standings, the full knockout bracket, the champion, and every group-stage match result — then get scored against the real outcomes on a shared leaderboard.
 
-> **Live site:** https://asim1234lab.github.io/worldcup--2026/ *(once GitHub Pages is enabled)*
+> **Live site (English):** https://asim1234lab.github.io/worldcup--2026/
+> **Live site (العربية):** https://asim1234lab.github.io/worldcup--2026/ar.html
 
 ## How it works
 
