@@ -247,13 +247,17 @@
   .lang-link:hover{border-color:var(--gold);background:rgba(212,175,55,.08);}
 
   /* ===== INTERACTIVE BRACKET TREE ===== */
+  .tp-tools{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:0 auto 8px;}
+  .tp-tools button{width:36px;height:36px;border:1px solid var(--line);background:var(--black2);color:var(--off);font-size:18px;font-weight:800;cursor:pointer;border-radius:8px;line-height:1;}
+  .tp-tools button:hover{border-color:var(--gold);color:var(--gold);}
+  .tp-tiphint{font-size:10px;color:var(--muted);font-weight:700;margin-inline-end:auto;}
   .tp-scroll{overflow:auto;max-width:100%;padding:8px 4px 24px;-webkit-overflow-scrolling:touch;}
   .tp-canvas{position:relative;margin:0 auto;}
   .tp-svg{position:absolute;left:0;pointer-events:none;}
   .tp-svg .cl{fill:none;stroke:#3a3a42;stroke-width:2;}
   .tp-svg .cd{fill:none;stroke:#7a6a35;stroke-width:1.6;stroke-dasharray:5 5;}
-  .tp-rt{position:absolute;top:6px;width:150px;text-align:center;font-size:12px;font-weight:900;color:var(--gold);}
-  .tp-box{position:absolute;width:150px;height:48px;background:var(--black2);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;z-index:2;}
+  .tp-rt{position:absolute;top:6px;width:156px;text-align:center;font-size:12px;font-weight:900;color:var(--gold);}
+  .tp-box{position:absolute;width:156px;height:54px;background:var(--black2);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;z-index:2;}
   .tp-box.fin{border-color:rgba(212,175,55,.5);}
   .tp-box.three{border-color:rgba(199,123,69,.55);}
   .tp-row{flex:1;display:flex;align-items:center;gap:7px;padding:0 9px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:.12s;}
@@ -263,15 +267,15 @@
   .tp-row.win{background:rgba(212,175,55,.14);} .tp-row.win .tp-nm{color:var(--gold-light);}
   .tp-row.lose{opacity:.5;}
   .tp-box.three .tp-row.win{background:rgba(199,123,69,.18);} .tp-box.three .tp-row.win .tp-nm{color:#E0A878;}
-  .tp-fl{font-size:15px;line-height:1;} .tp-nm{font-size:11px;font-weight:700;white-space:nowrap;}
+  .tp-fl{font-size:16px;line-height:1;} .tp-nm{font-size:12px;font-weight:700;white-space:nowrap;}
   .tp-md{font-size:11px;} .tp-md4{font-size:9px;font-weight:900;color:var(--muted);width:11px;text-align:center;}
   .tp-lab{position:absolute;top:-12px;right:5px;font-size:8px;font-weight:800;color:var(--muted);}
-  .tp-champ{position:absolute;width:150px;text-align:center;z-index:2;}
+  .tp-champ{position:absolute;width:156px;text-align:center;z-index:2;}
   .tp-clab{font-size:9px;letter-spacing:.05em;color:var(--muted);font-weight:800;margin-bottom:5px;}
   .tp-cmed{width:60px;height:60px;border-radius:50%;margin:0 auto 5px;background:radial-gradient(circle at 38% 32%,#fff,#dcdce2);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 0 0 3px var(--gold),0 0 22px rgba(212,175,55,.5);}
   .tp-cmed.empty{background:radial-gradient(circle at 38% 32%,#26262c,#16161a);color:#44444c;box-shadow:0 0 0 2px rgba(255,255,255,.06);}
   .tp-cn{font-size:16px;font-weight:900;color:var(--gold);}
-  .tp-tcap{position:absolute;width:150px;text-align:center;font-size:10px;font-weight:800;color:#C77B45;z-index:2;}
+  .tp-tcap{position:absolute;width:156px;text-align:center;font-size:10px;font-weight:800;color:#C77B45;z-index:2;}
 </style>
 </head>
 <body>
@@ -355,6 +359,7 @@
   <section class="stage" id="stage-3">
     <div class="stage-h"><div class="st-title">ابنِ شجرتك</div><div class="st-hint">انقر فريقاً في أي مواجهة لاختيار الفائز — يصعد تلقائياً في الشجرة حتى البطل.</div></div>
     <div class="warn"><span class="wi">⚠️</span><span><b>التوقّعات نهائية.</b> بمجرد الإرسال تُقفل توقّعاتك ولا يمكن تعديلها. تأكّد من رضاك عن كل اختيار.</span></div>
+    <div class="tp-tools"><button type="button" onclick="tpZoomBtn(-1)">−</button><button type="button" onclick="tpFitBtn()">⤢</button><button type="button" onclick="tpZoomBtn(1)">+</button><span class="tp-tiphint">اقرص أو انقر مزدوجاً أو استخدم ＋ / － للتكبير</span></div>
     <div class="tp-scroll"><div class="tp-canvas" id="treePickGrid"></div></div>
   </section>
 
@@ -500,7 +505,7 @@ const FEED={89:[74,77],90:[73,75],91:[76,78],92:[79,80],93:[83,84],94:[81,82],95
 97:[89,90],98:[93,94],99:[91,92],100:[95,96],101:[97,98],102:[99,100]};
 const TRT={tbd:'غير محدد',champ:'البطل',third:'تحديد المركز الثالث',r32:'دور 32',r16:'دور 16',qf:'ربع',sf:'نصف',fin:'النهائي'};
 function tn2(n){ return (typeof AR!=='undefined' && AR[n]) ? AR[n] : n; }
-const _BW=150,_BH=48,_PT=64,_GP=42;
+const _BW=156,_BH=54,_PT=72,_GP=44;
 let _LAY=null;
 function treeLayout(){
   if(_LAY) return _LAY;
@@ -571,7 +576,12 @@ function renderTreePick(containerId, interactive){
   const tp=lay.pos[103]; const tc=document.createElement('div'); tc.className='tp-tcap';
   tc.style.left=tp.x+'px'; tc.style.top=(tp.y-_BH/2-18+34)+'px'; tc.textContent='🥉 '+TRT.third;
   host.appendChild(tc);
+  tpFitInto(host, lay.W);
 }
+function tpFitInto(host,W){ const sc=host.parentElement; if(!sc)return; const cw=(sc.clientWidth||360)-14; let z=cw/W; if(z>1)z=1; if(z<0.18)z=0.18; host.dataset.zfit=z; host.style.zoom=z;
+  if(!host._dbl){ host._dbl=1; host.addEventListener('dblclick',()=>{ const f=+host.dataset.zfit||0.3; const cur=parseFloat(host.style.zoom)||1; host.style.zoom=(cur<0.999?1:f); }); } }
+function tpZoomBtn(d){ const h=document.getElementById('treePickGrid'); if(!h)return; let z=parseFloat(h.style.zoom)||1; z=Math.min(1.8,Math.max(0.18,+(z+d*0.18).toFixed(2))); h.style.zoom=z; }
+function tpFitBtn(){ const h=document.getElementById('treePickGrid'); if(h) tpFitInto(h, treeLayout().W); }
 
 /* ===================== USER / STATE ===================== */
 let currentPhone=null;
