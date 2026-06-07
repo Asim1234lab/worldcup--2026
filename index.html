@@ -237,6 +237,33 @@
     .badge26{font-size:64px;} .stepper .sdot span:not(.num){display:none;} .stepper{gap:3px;}
     .st-title{font-size:24px;} .nbtn{padding:13px 20px;font-size:14px;}
   }
+
+  /* ===== INTERACTIVE BRACKET TREE ===== */
+  .tp-scroll{overflow:auto;max-width:100%;padding:8px 4px 24px;-webkit-overflow-scrolling:touch;}
+  .tp-canvas{position:relative;margin:0 auto;}
+  .tp-svg{position:absolute;left:0;pointer-events:none;}
+  .tp-svg .cl{fill:none;stroke:#3a3a42;stroke-width:2;}
+  .tp-svg .cd{fill:none;stroke:#7a6a35;stroke-width:1.6;stroke-dasharray:5 5;}
+  .tp-rt{position:absolute;top:6px;width:150px;text-align:center;font-size:12px;font-weight:900;color:var(--gold);}
+  .tp-box{position:absolute;width:150px;height:48px;background:var(--black2);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;z-index:2;}
+  .tp-box.fin{border-color:rgba(212,175,55,.5);}
+  .tp-box.three{border-color:rgba(199,123,69,.55);}
+  .tp-row{flex:1;display:flex;align-items:center;gap:7px;padding:0 9px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:.12s;}
+  .tp-row:last-child{border-bottom:none;}
+  .tp-row:hover{background:rgba(255,255,255,.05);}
+  .tp-row.tbd{cursor:default;opacity:.5;} .tp-row.tbd:hover{background:none;}
+  .tp-row.win{background:rgba(212,175,55,.14);} .tp-row.win .tp-nm{color:var(--gold-light);}
+  .tp-row.lose{opacity:.5;}
+  .tp-box.three .tp-row.win{background:rgba(199,123,69,.18);} .tp-box.three .tp-row.win .tp-nm{color:#E0A878;}
+  .tp-fl{font-size:15px;line-height:1;} .tp-nm{font-size:11px;font-weight:700;white-space:nowrap;}
+  .tp-md{font-size:11px;} .tp-md4{font-size:9px;font-weight:900;color:var(--muted);width:11px;text-align:center;}
+  .tp-lab{position:absolute;top:-12px;right:5px;font-size:8px;font-weight:800;color:var(--muted);}
+  .tp-champ{position:absolute;width:150px;text-align:center;z-index:2;}
+  .tp-clab{font-size:9px;letter-spacing:.05em;color:var(--muted);font-weight:800;margin-bottom:5px;}
+  .tp-cmed{width:60px;height:60px;border-radius:50%;margin:0 auto 5px;background:radial-gradient(circle at 38% 32%,#fff,#dcdce2);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 0 0 3px var(--gold),0 0 22px rgba(212,175,55,.5);}
+  .tp-cmed.empty{background:radial-gradient(circle at 38% 32%,#26262c,#16161a);color:#44444c;box-shadow:0 0 0 2px rgba(255,255,255,.06);}
+  .tp-cn{font-size:16px;font-weight:900;color:var(--gold);}
+  .tp-tcap{position:absolute;width:150px;text-align:center;font-size:10px;font-weight:800;color:#C77B45;z-index:2;}
 </style>
 </head>
 <body>
@@ -316,19 +343,15 @@
     <div class="thirds-grid" id="thirdsGrid"></div>
   </section>
 
-  <!-- STAGE 3-7 knockout -->
-  <section class="stage" id="stage-3"><div class="stage-h"><div class="st-title">Round of 32</div><div class="st-hint">Bracket built from your groups. <b>Tap the winner</b> of each tie.</div></div><div class="ko-grid" id="r32Grid"></div></section>
-  <section class="stage" id="stage-4"><div class="stage-h"><div class="st-title">Round of 16</div><div class="st-hint">Your 16 survivors. <b>Tap the winner.</b></div></div><div class="ko-grid" id="r16Grid"></div></section>
-  <section class="stage" id="stage-5"><div class="stage-h"><div class="st-title">Quarter-finals</div><div class="st-hint">Final eight. <b>Tap the winner.</b></div></div><div class="ko-grid" id="qfGrid"></div></section>
-  <section class="stage" id="stage-6"><div class="stage-h"><div class="st-title">Semi-finals</div><div class="st-hint">Last four. <b>Tap who goes to the Final.</b></div></div><div class="ko-grid" id="sfGrid"></div></section>
-  <section class="stage" id="stage-7">
-    <div class="stage-h"><div class="st-title">Third Place &amp; Final</div><div class="st-hint">Pick your <b>3rd place</b> and your <b>Champion</b>, then submit.</div></div>
+  <!-- STAGE 3 interactive bracket tree -->
+  <section class="stage" id="stage-3">
+    <div class="stage-h"><div class="st-title">Build Your Bracket</div><div class="st-hint">Tap a team in any tie to pick the winner — it advances up the tree, all the way to the Champion.</div></div>
     <div class="warn"><span class="wi">⚠️</span><span><b>Predictions are final.</b> Once you submit, your bracket is locked and cannot be edited. Make sure you're happy with every pick.</span></div>
-    <div class="ko-grid" id="finalGrid"></div>
+    <div class="tp-scroll"><div class="tp-canvas" id="treePickGrid"></div></div>
   </section>
 
   <!-- STAGE 8 summary / locked -->
-  <section class="stage" id="stage-8">
+  <section class="stage" id="stage-4">
     <div class="lock-banner" id="lockBanner"></div>
     <div class="vtabs">
       <button class="vtab active" data-v="result" onclick="switchView('result',this)">My Bracket</button>
@@ -448,6 +471,84 @@ const SF=[{m:101,a:97,b:98},{m:102,a:99,b:100}];
 const FINAL={m:104,a:101,b:102};
 const THIRD={m:103,a:101,b:102};
 
+/* ============ INTERACTIVE BRACKET TREE (R32 -> Final + 3rd place) ============ */
+const FEED={89:[74,77],90:[73,75],91:[76,78],92:[79,80],93:[83,84],94:[81,82],95:[86,88],96:[85,87],
+97:[89,90],98:[93,94],99:[91,92],100:[95,96],101:[97,98],102:[99,100]};
+const TRT={tbd:'TBD',champ:'CHAMPION',third:'3rd place play-off',r32:'Round of 32',r16:'Round of 16',qf:'Quarter-finals',sf:'Semi-finals',fin:'Final'};
+function tn2(n){ return (typeof AR!=='undefined' && AR[n]) ? AR[n] : n; }
+const _BW=150,_BH=48,_PT=64,_GP=42;
+let _LAY=null;
+function treeLayout(){
+  if(_LAY) return _LAY;
+  const depth=m=>(m<=88?0:m<=96?1:m<=100?2:3);
+  const lv={L:[],R:[]};
+  const dfs=(m,s)=>{ if(m>=73&&m<=88){lv[s].push(m);return;} const f=FEED[m]; dfs(f[0],s); dfs(f[1],s); };
+  dfs(101,'L'); dfs(102,'R');
+  const y={}; const rowY=i=>i*_PT+_PT/2;
+  lv.L.forEach((m,i)=>y[m]=rowY(i)); lv.R.forEach((m,i)=>y[m]=rowY(i));
+  const sy=m=>{ if(y[m]!=null)return y[m]; const f=FEED[m]; return y[m]=(sy(f[0])+sy(f[1]))/2; };
+  [89,90,91,92,93,94,95,96,97,98,99,100,101,102].forEach(sy);
+  const side={}; lv.L.forEach(m=>side[m]='L'); lv.R.forEach(m=>side[m]='R');
+  [97,98,89,90,93,94,101].forEach(m=>side[m]='L'); [99,100,91,92,95,96,102].forEach(m=>side[m]='R');
+  const cw=_BW+_GP;
+  const xL=[10,10+cw,10+2*cw,10+3*cw];
+  const xF=xL[3]+cw+60;
+  const xRin=[xF+cw+60, xF+2*cw+60, xF+3*cw+60, xF+4*cw+60];
+  const pos={};
+  Object.keys(y).forEach(k=>{ const m=+k,s=side[m],d=depth(m); pos[m]={x:s==='L'?xL[d]:xRin[3-d],y:y[m],side:s}; });
+  const cy=(y[101]+y[102])/2;
+  pos[104]={x:xF,y:cy,side:'F'};
+  pos[103]={x:xF,y:cy+_PT+_BH+14,side:'T'};
+  const W=xRin[3]+_BW+10, H=Math.max(8*_PT, pos[103].y+_BH/2)+10;
+  _LAY={pos,W,H,cols:{xL,xF,xRin}};
+  return _LAY;
+}
+function treeTeams(m){
+  if(m>=73&&m<=88){ const e=R32.find(x=>x.m===m); return [r32Side(e.a),r32Side(e.b)]; }
+  if(m===104){ return [{team:feeder(101),seed:'W101'},{team:feeder(102),seed:'W102'}]; }
+  if(m===103){ return [{team:loserOf(101),seed:'L101'},{team:loserOf(102),seed:'L102'}]; }
+  const f=FEED[m]; return [{team:feeder(f[0]),seed:'W'+f[0]},{team:feeder(f[1]),seed:'W'+f[1]}];
+}
+function renderTreePick(containerId, interactive){
+  const lay=treeLayout(); const host=document.getElementById(containerId); if(!host) return;
+  host.style.position='relative'; host.style.width=lay.W+'px'; host.style.height=(lay.H+34)+'px';
+  const elbow=(x1,y1,x2,y2)=>{const mx=(x1+x2)/2;return `${x1},${y1} ${mx},${y1} ${mx},${y2} ${x2},${y2}`;};
+  let conns='', dconns='';
+  [89,90,91,92,93,94,95,96,97,98,99,100,101,102].forEach(m=>{ const f=FEED[m]; const p=lay.pos[m];
+    f.forEach(ch=>{ const c=lay.pos[ch]; let x1,x2; if(p.side==='L'){x1=c.x+_BW;x2=p.x;}else{x1=c.x;x2=p.x+_BW;}
+      conns+=`<polyline points="${elbow(x1,c.y,x2,p.y)}"/>`; }); });
+  { const p=lay.pos[104],l=lay.pos[101],r=lay.pos[102];
+    conns+=`<polyline points="${elbow(l.x+_BW,l.y,p.x,p.y)}"/>`;
+    conns+=`<polyline points="${elbow(r.x,r.y,p.x+_BW,p.y)}"/>`; }
+  { const p=lay.pos[103],l=lay.pos[101],r=lay.pos[102];
+    dconns+=`<polyline points="${elbow(l.x+_BW,l.y+10,p.x,p.y)}"/>`;
+    dconns+=`<polyline points="${elbow(r.x,r.y+10,p.x+_BW,p.y)}"/>`; }
+  host.innerHTML=`<svg class="tp-svg" viewBox="0 0 ${lay.W} ${lay.H}" style="width:${lay.W}px;height:${lay.H}px;top:34px" preserveAspectRatio="none"><g class="cl">${conns}</g><g class="cd">${dconns}</g></svg>`;
+  const C=lay.cols;
+  [[TRT.r32,C.xL[0]],[TRT.r16,C.xL[1]],[TRT.qf,C.xL[2]],[TRT.sf,C.xL[3]],[TRT.fin,C.xF],[TRT.sf,C.xRin[0]],[TRT.qf,C.xRin[1]],[TRT.r16,C.xRin[2]],[TRT.r32,C.xRin[3]]].forEach(a=>{ const d=document.createElement('div'); d.className='tp-rt'; d.style.left=a[1]+'px'; d.textContent=a[0]; host.appendChild(d); });
+  const all=[73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,104,103];
+  all.forEach(m=>{ const p=lay.pos[m]; if(!p)return; const teams=treeTeams(m); const w=state.winners[m];
+    const box=document.createElement('div'); box.className='tp-box'+(m===103?' three':'')+(m===104?' fin':'');
+    box.style.left=p.x+'px'; box.style.top=(p.y-_BH/2+34)+'px';
+    teams.forEach((info,idx)=>{ const t=info.team; const picked=t&&sameTeam(w,t);
+      const row=document.createElement('div'); row.className='tp-row'+(picked?' win':'')+(t&&w&&!picked?' lose':'')+(t?'':' tbd');
+      let badge=''; if(m===103) badge = idx===0?'<span class="tp-md">🥉</span>':'<span class="tp-md4">4</span>';
+      row.innerHTML=`${badge}<span class="tp-fl">${t?t.flag:'·'}</span><span class="tp-nm">${t?tn2(t.name):TRT.tbd}</span>`;
+      if(interactive&&t&&!state.submitted) row.onclick=()=>pickWinner(m,t);
+      box.appendChild(row);
+    });
+    const lab=document.createElement('span'); lab.className='tp-lab'; lab.textContent='M'+m; box.appendChild(lab);
+    host.appendChild(box);
+  });
+  const champ=state.winners[104], cp=lay.pos[104];
+  const cc=document.createElement('div'); cc.className='tp-champ'; cc.style.left=cp.x+'px'; cc.style.top=(cp.y-_BH/2-120+34)+'px';
+  cc.innerHTML= champ?`<div class="tp-clab">🏆 ${TRT.champ}</div><div class="tp-cmed">${champ.flag}</div><div class="tp-cn">${tn2(champ.name)}</div>`:`<div class="tp-clab">🏆 ${TRT.champ}</div><div class="tp-cmed empty">?</div>`;
+  host.appendChild(cc);
+  const tp=lay.pos[103]; const tc=document.createElement('div'); tc.className='tp-tcap';
+  tc.style.left=tp.x+'px'; tc.style.top=(tp.y-_BH/2-18+34)+'px'; tc.textContent='🥉 '+TRT.third;
+  host.appendChild(tc);
+}
+
 /* ===================== USER / STATE ===================== */
 let currentPhone=null;
 let state=blankBracket();
@@ -559,7 +660,7 @@ const winnerOf=g=>teamObj(g,0), runnerOf=g=>teamObj(g,1), thirdOf=g=>teamObj(g,2
 const sameTeam=(a,b)=>a&&b&&a.group===b.group&&a.name===b.name;
 
 /* ===================== STEPPER ===================== */
-const STEPS=['Groups','Thirds','R32','R16','QF','SF','Final','Bracket'];
+const STEPS=['Groups','Thirds','Bracket','My Bracket'];
 function renderStepper(){
   const el=document.getElementById('stepper'); el.innerHTML='';
   STEPS.forEach((nm,i)=>{ const n=i+1;
@@ -745,7 +846,7 @@ function switchView(v,btn){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
   document.querySelectorAll('.view-pane').forEach(p=>p.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  if(v==='tree')renderTree();
+  if(v==='tree')renderTreePick('treeBox',false);
 }
 
 /* ===================== MODE (bracket vs group matches) ===================== */
@@ -783,13 +884,9 @@ function refreshStage(){
   switch(state.stage){
     case 1:renderGroups();break;
     case 2:renderThirds();break;
-    case 3:renderKO('r32Grid',R32,r32Resolver,'R32');break;
-    case 4:renderKO('r16Grid',R16,feedResolver(),'R16');break;
-    case 5:renderKO('qfGrid',QF,feedResolver(),'QF');break;
-    case 6:renderKO('sfGrid',SF,feedResolver(),'SF');break;
-    case 7:renderKO('finalGrid',[THIRD,FINAL],finalResolver,'Final');break;
-    case 8:
-      const u=loadUsers()[currentPhone];
+    case 3:renderTreePick('treePickGrid',!state.submitted);break;
+    case 4:
+      var u=loadUsers()[currentPhone];
       document.getElementById('lockBanner').innerHTML= state.submitted
         ? `🔒 <b>Your bracket is locked.</b> Submitted predictions can't be edited. Browse your bracket, the full tree, and the group matches below.`
         : `Preview your bracket below.`;
@@ -799,41 +896,34 @@ function refreshStage(){
 }
 function stageComplete(){ switch(state.stage){
   case 1:return allGroupsDone(); case 2:return state.chosenThirds.length===8;
-  case 3:return r32Done(); case 4:return r16Done(); case 5:return qfDone();
-  case 6:return sfDone(); case 7:return finalsDone(); case 8:return true; } }
+  case 3:return finalsDone(); case 4:return true; } }
 function updateNav(){
   const back=document.getElementById('backBtn'),next=document.getElementById('nextBtn'),stat=document.getElementById('nstat');
   const nav=document.getElementById('navBar');
-  if(state.stage===8){ nav.style.display='none'; return; } nav.style.display='flex';
+  if(state.stage===4){ nav.style.display='none'; return; } nav.style.display='flex';
   back.style.visibility=(state.stage===1||state.submitted)?'hidden':'visible';
   next.disabled=!stageComplete();
-  // turn Next into Submit on stage 7
-  if(state.stage===7){ next.textContent='🔒 Submit Final Bracket'; next.classList.add('submit'); }
+  if(state.stage===3){ next.textContent='🔒 Submit Final Bracket'; next.classList.add('submit'); }
   else { next.textContent='Next →'; next.classList.remove('submit'); }
   let t='';
   switch(state.stage){
     case 1:t=`<b>${GL.filter(g=>state.order[g]&&state.order[g].length===4).length}</b> / 12 groups`;break;
     case 2:t=`<b>${state.chosenThirds.length}</b> / 8 thirds`;break;
-    case 3:t=`<b>${R32.filter(m=>state.winners[m.m]).length}</b> / 16`;break;
-    case 4:t=`<b>${R16.filter(m=>state.winners[m.m]).length}</b> / 8`;break;
-    case 5:t=`<b>${QF.filter(m=>state.winners[m.m]).length}</b> / 4`;break;
-    case 6:t=`<b>${SF.filter(m=>state.winners[m.m]).length}</b> / 2`;break;
-    case 7:t=`<b>${(state.winners[FINAL.m]?1:0)+(state.winners[THIRD.m]?1:0)}</b> / 2 deciders`;break;
+    case 3:{const done=[...R32,...R16,...QF,...SF,FINAL,THIRD].filter(m=>state.winners[m.m]).length; t=`<b>${done}</b> / 32 picks`;}break;
   }
   stat.innerHTML=t;
 }
 function nextStage(){
   if(!stageComplete())return;
-  if(state.stage===7){ // SUBMIT
+  if(state.stage===3){
     showConfirm('Submit your final bracket? This is permanent — you will NOT be able to edit any pick after submitting.', ()=>{
-      try{
-        state.submitted=true; state.stage=8; persist(); refreshNavLock(); showStage();
-      }catch(e){ alert('Something went wrong submitting: '+e.message); }
+      try{ state.submitted=true; state.stage=4; persist(); refreshNavLock(); showStage(); }
+      catch(e){ alert('Something went wrong submitting: '+e.message); }
     });
     return;
   }
   if(state.stage===2) assignThirds();
-  if(state.stage<8){ state.stage++; persist(); showStage(); }
+  if(state.stage<4){ state.stage++; persist(); showStage(); }
 }
 function prevStage(){ if(state.stage>1&&!state.submitted){ state.stage--; persist(); showStage(); } }
 function resetBracket(){ showConfirm('Clear your bracket and predict again? (Testing only — a real league would not allow this.)', ()=>{ state=blankBracket(); persist(); showStage(); }); }
