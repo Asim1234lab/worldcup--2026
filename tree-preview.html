@@ -1,115 +1,33 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مثال — شكل الشجرة</title>
+<title>مثال — شجرة دور الـ32</title>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{--black:#0B0B0D;--black2:#141417;--ink:#1C1C20;--white:#fff;--muted:#8A8A96;--gold:#D4AF37;--gold-light:#F0D879;--line:rgba(255,255,255,.14);}
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;padding:26px 10px 40px;
-    background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(212,175,55,.07),transparent 55%);}
-  .head{text-align:center;margin-bottom:8px;}
-  .head h1{font-size:26px;font-weight:900;}
-  .head h1 b{color:var(--gold);}
-  .head p{color:var(--muted);font-size:13px;font-weight:600;margin-top:4px;}
-  .hint{text-align:center;color:var(--muted);font-size:12px;font-weight:600;margin-bottom:14px;}
-  .hint b{color:var(--gold);}
-
-  .scroll{overflow-x:auto;padding:10px;}
-  .canvas{position:relative;width:1240px;height:620px;margin:0 auto;}
-  svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-
-  .rtitle{position:absolute;top:-2px;width:200px;text-align:center;font-weight:900;font-size:14px;color:var(--gold);letter-spacing:0;}
-
-  .box{position:absolute;width:200px;height:80px;background:var(--black2);border:1px solid var(--line);
-    border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
-  .trow{flex:1;display:flex;align-items:center;gap:9px;padding:0 11px;border-bottom:1px solid rgba(255,255,255,.06);}
-  .trow:last-child{border-bottom:none;}
-  .fl{font-size:20px;line-height:1;}
-  .nm{font-size:13px;font-weight:700;}
-  .seed{margin-inline-start:auto;font-size:9px;font-weight:700;color:var(--muted);}
-  .trow.win{background:rgba(212,175,55,.10);}
-  .trow.win .nm{color:var(--gold-light);}
-  .trow.lose{opacity:.5;}
-
-  .champ{position:absolute;width:200px;top:228px;left:1000px;text-align:center;}
-  .champ .cmed{width:84px;height:84px;border-radius:50%;margin:0 auto 8px;
-    background:radial-gradient(circle at 38% 32%,#fff,#dcdce2);display:flex;align-items:center;justify-content:center;
-    font-size:46px;box-shadow:0 0 0 4px var(--gold),0 0 30px rgba(212,175,55,.55);}
-  .champ .cname{font-size:22px;font-weight:900;color:var(--gold);}
-  .champ .clab{font-size:10px;letter-spacing:.1em;color:var(--muted);font-weight:800;margin-bottom:8px;}
-  .mnode{position:absolute;width:30px;height:30px;border-radius:50%;background:#fff;color:#0B0B0D;
-    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;font-family:'Anton';z-index:3;}
-</style>
-</head>
-<body>
-  <div class="head"><h1>كأس العالم <b>26</b> — مثال شكل الشجرة</h1>
-    <p>عرض مقترح يستبدل البطاقات الحالية بشجرة متصلة بخطوط</p></div>
-  <div class="hint">انقر الفائز فينتقل تلقائياً للدور التالي على طول الشجرة · <b>الذهبي = مسار البطل</b></div>
-
-  <div class="scroll"><div class="canvas">
-    <svg viewBox="0 0 1240 620" preserveAspectRatio="none">
-      <!-- grey connectors -->
-      <g fill="none" stroke="#3a3a42" stroke-width="2">
-        <polyline points="240,80 300,80 300,156 360,156"/>
-        <polyline points="240,232 300,232 300,156 360,156"/>
-        <polyline points="240,536 300,536 300,460 360,460"/>
-        <polyline points="560,156 620,156 620,308 680,308"/>
-      </g>
-      <!-- gold = champion path (Argentina) -->
-      <g fill="none" stroke="#D4AF37" stroke-width="2.5">
-        <polyline points="240,384 300,384 300,460 360,460"/>
-        <polyline points="560,460 620,460 620,308 680,308"/>
-        <polyline points="880,308 1000,308"/>
-      </g>
-    </svg>
-
-    <!-- round titles -->
-    <div class="rtitle" style="left:40px">دور 16</div>
-    <div class="rtitle" style="left:360px">ربع النهائي</div>
-    <div class="rtitle" style="left:680px">نصف النهائي</div>
-    <div class="rtitle" style="left:1000px">🏆 البطل</div>
-
-    <!-- R16 -->
-    <div class="box" style="left:40px;top:40px">
-      <div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span><span class="seed">1C</span></div>
-      <div class="trow lose"><span class="fl">🇲🇦</span><span class="nm">المغرب</span><span class="seed">2C</span></div></div>
-    <div class="box" style="left:40px;top:192px">
-      <div class="trow win"><span class="fl">🇪🇸</span><span class="nm">إسبانيا</span><span class="seed">1H</span></div>
-      <div class="trow lose"><span class="fl">🇯🇵</span><span class="nm">اليابان</span><span class="seed">2F</span></div></div>
-    <div class="box" style="left:40px;top:344px">
-      <div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span><span class="seed">1J</span></div>
-      <div class="trow lose"><span class="fl">🇭🇷</span><span class="nm">كرواتيا</span><span class="seed">2L</span></div></div>
-    <div class="box" style="left:40px;top:496px">
-      <div class="trow win"><span class="fl">🇫🇷</span><span class="nm">فرنسا</span><span class="seed">1I</span></div>
-      <div class="trow lose"><span class="fl">🇵🇹</span><span class="nm">البرتغال</span><span class="seed">1K</span></div></div>
-
-    <!-- QF -->
-    <div class="box" style="left:360px;top:116px">
-      <div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div>
-      <div class="trow lose"><span class="fl">🇪🇸</span><span class="nm">إسبانيا</span></div></div>
-    <div class="box" style="left:360px;top:420px">
-      <div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div>
-      <div class="trow lose"><span class="fl">🇫🇷</span><span class="nm">فرنسا</span></div></div>
-
-    <!-- SF -->
-    <div class="box" style="left:680px;top:268px">
-      <div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div>
-      <div class="trow lose"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div></div>
-
-    <!-- match nodes -->
-    <div class="mnode" style="left:315px;top:141px">M89</div>
-    <div class="mnode" style="left:315px;top:445px">M92</div>
-    <div class="mnode" style="left:635px;top:293px">M97</div>
-
-    <!-- Champion -->
-    <div class="champ">
-      <div class="clab">بطل العالم</div>
-      <div class="cmed">🇦🇷</div>
-      <div class="cname">الأرجنتين</div>
-    </div>
-  </div></div>
-</body>
-</html>
+:root{--black:#0B0B0D;--black2:#141417;--white:#fff;--muted:#8A8A96;--gold:#D4AF37;--gold-light:#F0D879;--line:rgba(255,255,255,.14);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;padding:22px 6px 36px;
+background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(212,175,55,.07),transparent 55%);}
+.head{text-align:center;margin-bottom:6px;} .head h1{font-size:24px;font-weight:900;} .head h1 b{color:var(--gold);}
+.head p{color:var(--muted);font-size:12px;font-weight:600;margin-top:3px;}
+.hint{text-align:center;color:var(--muted);font-size:11px;font-weight:700;margin-bottom:12px;} .hint b{color:var(--gold);}
+.scroll{overflow-x:auto;padding:8px;-webkit-overflow-scrolling:touch;}
+.canvas{position:relative;width:1826px;height:556px;margin:0 auto;}
+svg{position:absolute;left:0;top:30px;width:1826px;height:526px;pointer-events:none;}
+.rtitle{position:absolute;top:2px;text-align:center;font-weight:900;font-size:13px;color:var(--gold);}
+.box{position:absolute;width:150px;height:48px;margin-top:30px;background:var(--black2);border:1px solid var(--line);
+border-radius:8px;overflow:hidden;display:flex;flex-direction:column;}
+.mlab{position:absolute;top:-13px;right:4px;font-size:8px;font-weight:800;color:var(--muted);font-family:'Anton';}
+.trow{flex:1;display:flex;align-items:center;gap:7px;padding:0 9px;border-bottom:1px solid rgba(255,255,255,.06);}
+.trow:last-child{border-bottom:none;} .fl{font-size:15px;line-height:1;} .nm{font-size:11px;font-weight:700;white-space:nowrap;}
+.trow.win{background:rgba(212,175,55,.12);} .trow.win .nm{color:var(--gold-light);} .trow.lose{opacity:.45;}
+.champ{position:absolute;margin-top:30px;text-align:center;}
+.champ .clab{font-size:9px;letter-spacing:.06em;color:var(--muted);font-weight:800;margin-bottom:6px;}
+.champ .cmed{width:70px;height:70px;border-radius:50%;margin:0 auto 6px;background:radial-gradient(circle at 38% 32%,#fff,#dcdce2);
+display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 0 4px var(--gold),0 0 26px rgba(212,175,55,.55);}
+.champ .cname{font-size:18px;font-weight:900;color:var(--gold);}
+</style></head><body>
+<div class="head"><h1>كأس العالم <b>26</b> — شجرة كاملة من دور الـ32</h1>
+<p>الجانبان يلتقيان في النهائي بالمنتصف · مرّر أفقياً لرؤية الشجرة كاملة</p></div>
+<div class="hint">انقر الفائز فينتقل تلقائياً للأعلى · <b>الذهبي = مسار البطل</b></div>
+<div class="scroll"><div class="canvas"><svg viewBox="0 0 1826 526" preserveAspectRatio="none"><g fill="none" stroke="#3a3a42" stroke-width="2"><polyline points="160,98 181.0,98 181.0,66.0 202,66.0"/><polyline points="160,162 181.0,162 181.0,194.0 202,194.0"/><polyline points="160,226 181.0,226 181.0,194.0 202,194.0"/><polyline points="160,290 181.0,290 181.0,322.0 202,322.0"/><polyline points="160,354 181.0,354 181.0,322.0 202,322.0"/><polyline points="160,418 181.0,418 181.0,450.0 202,450.0"/><polyline points="160,482 181.0,482 181.0,450.0 202,450.0"/><polyline points="352,194.0 373.0,194.0 373.0,130.0 394,130.0"/><polyline points="352,322.0 373.0,322.0 373.0,386.0 394,386.0"/><polyline points="352,450.0 373.0,450.0 373.0,386.0 394,386.0"/><polyline points="544,386.0 565.0,386.0 565.0,258.0 586,258.0"/><polyline points="1666,34 1645.0,34 1645.0,66.0 1624,66.0"/><polyline points="1666,98 1645.0,98 1645.0,66.0 1624,66.0"/><polyline points="1666,162 1645.0,162 1645.0,194.0 1624,194.0"/><polyline points="1666,226 1645.0,226 1645.0,194.0 1624,194.0"/><polyline points="1666,290 1645.0,290 1645.0,322.0 1624,322.0"/><polyline points="1666,354 1645.0,354 1645.0,322.0 1624,322.0"/><polyline points="1666,418 1645.0,418 1645.0,450.0 1624,450.0"/><polyline points="1666,482 1645.0,482 1645.0,450.0 1624,450.0"/><polyline points="1474,66.0 1453.0,66.0 1453.0,130.0 1432,130.0"/><polyline points="1474,194.0 1453.0,194.0 1453.0,130.0 1432,130.0"/><polyline points="1474,322.0 1453.0,322.0 1453.0,386.0 1432,386.0"/><polyline points="1474,450.0 1453.0,450.0 1453.0,386.0 1432,386.0"/><polyline points="1282,130.0 1261.0,130.0 1261.0,258.0 1240,258.0"/><polyline points="1282,386.0 1261.0,386.0 1261.0,258.0 1240,258.0"/><polyline points="1090,258.0 1039.0,258.0 1039.0,258.0 988,258.0"/></g><g fill="none" stroke="#D4AF37" stroke-width="2.5"><polyline points="160,34 181.0,34 181.0,66.0 202,66.0"/><polyline points="352,66.0 373.0,66.0 373.0,130.0 394,130.0"/><polyline points="544,130.0 565.0,130.0 565.0,258.0 586,258.0"/><polyline points="736,258.0 787.0,258.0 787.0,258.0 838,258.0"/></g></svg><div class="rtitle" style="left:10px;width:150px">دور 32</div><div class="rtitle" style="left:202px;width:150px">دور 16</div><div class="rtitle" style="left:394px;width:150px">ربع</div><div class="rtitle" style="left:586px;width:150px">نصف</div><div class="rtitle" style="left:838px;width:150px">النهائي</div><div class="rtitle" style="left:1090px;width:150px">نصف</div><div class="rtitle" style="left:1282px;width:150px">ربع</div><div class="rtitle" style="left:1474px;width:150px">دور 16</div><div class="rtitle" style="left:1666px;width:150px">دور 32</div><div class="box" style="left:10px;top:10.0px"><span class="mlab">M73</span><div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div><div class="trow lose"><span class="fl">🇲🇦</span><span class="nm">المغرب</span></div></div><div class="box" style="left:10px;top:74.0px"><span class="mlab">M74</span><div class="trow win"><span class="fl">🇪🇸</span><span class="nm">إسبانيا</span></div><div class="trow lose"><span class="fl">🇺🇾</span><span class="nm">الأوروغواي</span></div></div><div class="box" style="left:10px;top:138.0px"><span class="mlab">M75</span><div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div><div class="trow lose"><span class="fl">🇭🇷</span><span class="nm">كرواتيا</span></div></div><div class="box" style="left:10px;top:202.0px"><span class="mlab">M76</span><div class="trow win"><span class="fl">🇫🇷</span><span class="nm">فرنسا</span></div><div class="trow lose"><span class="fl">🇸🇳</span><span class="nm">السنغال</span></div></div><div class="box" style="left:10px;top:266.0px"><span class="mlab">M77</span><div class="trow win"><span class="fl">🇩🇪</span><span class="nm">ألمانيا</span></div><div class="trow lose"><span class="fl">🇯🇵</span><span class="nm">اليابان</span></div></div><div class="box" style="left:10px;top:330.0px"><span class="mlab">M78</span><div class="trow win"><span class="fl">🇵🇹</span><span class="nm">البرتغال</span></div><div class="trow lose"><span class="fl">🇰🇷</span><span class="nm">كوريا</span></div></div><div class="box" style="left:10px;top:394.0px"><span class="mlab">M79</span><div class="trow win"><span class="fl">🇳🇱</span><span class="nm">هولندا</span></div><div class="trow lose"><span class="fl">🇲🇽</span><span class="nm">المكسيك</span></div></div><div class="box" style="left:10px;top:458.0px"><span class="mlab">M80</span><div class="trow win"><span class="fl">🇧🇪</span><span class="nm">بلجيكا</span></div><div class="trow lose"><span class="fl">🇨🇦</span><span class="nm">كندا</span></div></div><div class="box" style="left:202px;top:42.0px"><span class="mlab">M89</span><div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div><div class="trow lose"><span class="fl">🇪🇸</span><span class="nm">إسبانيا</span></div></div><div class="box" style="left:202px;top:170.0px"><span class="mlab">M90</span><div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div><div class="trow lose"><span class="fl">🇫🇷</span><span class="nm">فرنسا</span></div></div><div class="box" style="left:202px;top:298.0px"><span class="mlab">M91</span><div class="trow win"><span class="fl">🇩🇪</span><span class="nm">ألمانيا</span></div><div class="trow lose"><span class="fl">🇵🇹</span><span class="nm">البرتغال</span></div></div><div class="box" style="left:202px;top:426.0px"><span class="mlab">M92</span><div class="trow win"><span class="fl">🇳🇱</span><span class="nm">هولندا</span></div><div class="trow lose"><span class="fl">🇧🇪</span><span class="nm">بلجيكا</span></div></div><div class="box" style="left:394px;top:106.0px"><span class="mlab">M97</span><div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div><div class="trow lose"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div></div><div class="box" style="left:394px;top:362.0px"><span class="mlab">M98</span><div class="trow win"><span class="fl">🇩🇪</span><span class="nm">ألمانيا</span></div><div class="trow lose"><span class="fl">🇳🇱</span><span class="nm">هولندا</span></div></div><div class="box" style="left:586px;top:234.0px"><span class="mlab">M101</span><div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div><div class="trow lose"><span class="fl">🇩🇪</span><span class="nm">ألمانيا</span></div></div><div class="box" style="left:1666px;top:10.0px"><span class="mlab">M81</span><div class="trow win"><span class="fl">🇹🇳</span><span class="nm">تونس</span></div><div class="trow lose"><span class="fl">🇬🇭</span><span class="nm">غانا</span></div></div><div class="box" style="left:1666px;top:74.0px"><span class="mlab">M82</span><div class="trow win"><span class="fl">🇪🇬</span><span class="nm">مصر</span></div><div class="trow lose"><span class="fl">🇸🇦</span><span class="nm">السعودية</span></div></div><div class="box" style="left:1666px;top:138.0px"><span class="mlab">M83</span><div class="trow win"><span class="fl">🇨🇮</span><span class="nm">ساحل العاج</span></div><div class="trow lose"><span class="fl">🇪🇨</span><span class="nm">الإكوادور</span></div></div><div class="box" style="left:1666px;top:202.0px"><span class="mlab">M84</span><div class="trow win"><span class="fl">🇳🇴</span><span class="nm">النرويج</span></div><div class="trow lose"><span class="fl">🇨🇴</span><span class="nm">كولومبيا</span></div></div><div class="box" style="left:1666px;top:266.0px"><span class="mlab">M85</span><div class="trow win"><span class="fl">🇩🇿</span><span class="nm">الجزائر</span></div><div class="trow lose"><span class="fl">🇨🇭</span><span class="nm">سويسرا</span></div></div><div class="box" style="left:1666px;top:330.0px"><span class="mlab">M86</span><div class="trow win"><span class="fl">🇺🇸</span><span class="nm">أمريكا</span></div><div class="trow lose"><span class="fl">🇦🇺</span><span class="nm">أستراليا</span></div></div><div class="box" style="left:1666px;top:394.0px"><span class="mlab">M87</span><div class="trow win"><span class="fl">🇮🇷</span><span class="nm">إيران</span></div><div class="trow lose"><span class="fl">🇶🇦</span><span class="nm">قطر</span></div></div><div class="box" style="left:1666px;top:458.0px"><span class="mlab">M88</span><div class="trow win"><span class="fl">🇹🇷</span><span class="nm">تركيا</span></div><div class="trow lose"><span class="fl">🇸🇪</span><span class="nm">السويد</span></div></div><div class="box" style="left:1474px;top:42.0px"><span class="mlab">M93</span><div class="trow win"><span class="fl">🇹🇳</span><span class="nm">تونس</span></div><div class="trow lose"><span class="fl">🇪🇬</span><span class="nm">مصر</span></div></div><div class="box" style="left:1474px;top:170.0px"><span class="mlab">M94</span><div class="trow win"><span class="fl">🇨🇮</span><span class="nm">ساحل العاج</span></div><div class="trow lose"><span class="fl">🇳🇴</span><span class="nm">النرويج</span></div></div><div class="box" style="left:1474px;top:298.0px"><span class="mlab">M95</span><div class="trow win"><span class="fl">🇩🇿</span><span class="nm">الجزائر</span></div><div class="trow lose"><span class="fl">🇺🇸</span><span class="nm">أمريكا</span></div></div><div class="box" style="left:1474px;top:426.0px"><span class="mlab">M96</span><div class="trow win"><span class="fl">🇮🇷</span><span class="nm">إيران</span></div><div class="trow lose"><span class="fl">🇹🇷</span><span class="nm">تركيا</span></div></div><div class="box" style="left:1282px;top:106.0px"><span class="mlab">M99</span><div class="trow win"><span class="fl">🇹🇳</span><span class="nm">تونس</span></div><div class="trow lose"><span class="fl">🇨🇮</span><span class="nm">ساحل العاج</span></div></div><div class="box" style="left:1282px;top:362.0px"><span class="mlab">M100</span><div class="trow win"><span class="fl">🇩🇿</span><span class="nm">الجزائر</span></div><div class="trow lose"><span class="fl">🇮🇷</span><span class="nm">إيران</span></div></div><div class="box" style="left:1090px;top:234.0px"><span class="mlab">M102</span><div class="trow win"><span class="fl">🇹🇳</span><span class="nm">تونس</span></div><div class="trow lose"><span class="fl">🇩🇿</span><span class="nm">الجزائر</span></div></div><div class="box" style="left:838px;top:234.0px"><span class="mlab">M104</span><div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div><div class="trow lose"><span class="fl">🇹🇳</span><span class="nm">تونس</span></div></div><div class="champ" style="left:838px;top:116.0px;width:150px"><div class="clab">🏆 بطل العالم</div><div class="cmed">🇧🇷</div><div class="cname">البرازيل</div></div></div></div>
+</body></html>
