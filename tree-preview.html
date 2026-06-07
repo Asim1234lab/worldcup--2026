@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مثال — شكل الشجرة</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--black:#0B0B0D;--black2:#141417;--ink:#1C1C20;--white:#fff;--muted:#8A8A96;--gold:#D4AF37;--gold-light:#F0D879;--line:rgba(255,255,255,.14);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--black);color:var(--white);font-family:'Cairo',sans-serif;padding:26px 10px 40px;
+    background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(212,175,55,.07),transparent 55%);}
+  .head{text-align:center;margin-bottom:8px;}
+  .head h1{font-size:26px;font-weight:900;}
+  .head h1 b{color:var(--gold);}
+  .head p{color:var(--muted);font-size:13px;font-weight:600;margin-top:4px;}
+  .hint{text-align:center;color:var(--muted);font-size:12px;font-weight:600;margin-bottom:14px;}
+  .hint b{color:var(--gold);}
+
+  .scroll{overflow-x:auto;padding:10px;}
+  .canvas{position:relative;width:1240px;height:620px;margin:0 auto;}
+  svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+  .rtitle{position:absolute;top:-2px;width:200px;text-align:center;font-weight:900;font-size:14px;color:var(--gold);letter-spacing:0;}
+
+  .box{position:absolute;width:200px;height:80px;background:var(--black2);border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+  .trow{flex:1;display:flex;align-items:center;gap:9px;padding:0 11px;border-bottom:1px solid rgba(255,255,255,.06);}
+  .trow:last-child{border-bottom:none;}
+  .fl{font-size:20px;line-height:1;}
+  .nm{font-size:13px;font-weight:700;}
+  .seed{margin-inline-start:auto;font-size:9px;font-weight:700;color:var(--muted);}
+  .trow.win{background:rgba(212,175,55,.10);}
+  .trow.win .nm{color:var(--gold-light);}
+  .trow.lose{opacity:.5;}
+
+  .champ{position:absolute;width:200px;top:228px;left:1000px;text-align:center;}
+  .champ .cmed{width:84px;height:84px;border-radius:50%;margin:0 auto 8px;
+    background:radial-gradient(circle at 38% 32%,#fff,#dcdce2);display:flex;align-items:center;justify-content:center;
+    font-size:46px;box-shadow:0 0 0 4px var(--gold),0 0 30px rgba(212,175,55,.55);}
+  .champ .cname{font-size:22px;font-weight:900;color:var(--gold);}
+  .champ .clab{font-size:10px;letter-spacing:.1em;color:var(--muted);font-weight:800;margin-bottom:8px;}
+  .mnode{position:absolute;width:30px;height:30px;border-radius:50%;background:#fff;color:#0B0B0D;
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;font-family:'Anton';z-index:3;}
+</style>
+</head>
+<body>
+  <div class="head"><h1>كأس العالم <b>26</b> — مثال شكل الشجرة</h1>
+    <p>عرض مقترح يستبدل البطاقات الحالية بشجرة متصلة بخطوط</p></div>
+  <div class="hint">انقر الفائز فينتقل تلقائياً للدور التالي على طول الشجرة · <b>الذهبي = مسار البطل</b></div>
+
+  <div class="scroll"><div class="canvas">
+    <svg viewBox="0 0 1240 620" preserveAspectRatio="none">
+      <!-- grey connectors -->
+      <g fill="none" stroke="#3a3a42" stroke-width="2">
+        <polyline points="240,80 300,80 300,156 360,156"/>
+        <polyline points="240,232 300,232 300,156 360,156"/>
+        <polyline points="240,536 300,536 300,460 360,460"/>
+        <polyline points="560,156 620,156 620,308 680,308"/>
+      </g>
+      <!-- gold = champion path (Argentina) -->
+      <g fill="none" stroke="#D4AF37" stroke-width="2.5">
+        <polyline points="240,384 300,384 300,460 360,460"/>
+        <polyline points="560,460 620,460 620,308 680,308"/>
+        <polyline points="880,308 1000,308"/>
+      </g>
+    </svg>
+
+    <!-- round titles -->
+    <div class="rtitle" style="left:40px">دور 16</div>
+    <div class="rtitle" style="left:360px">ربع النهائي</div>
+    <div class="rtitle" style="left:680px">نصف النهائي</div>
+    <div class="rtitle" style="left:1000px">🏆 البطل</div>
+
+    <!-- R16 -->
+    <div class="box" style="left:40px;top:40px">
+      <div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span><span class="seed">1C</span></div>
+      <div class="trow lose"><span class="fl">🇲🇦</span><span class="nm">المغرب</span><span class="seed">2C</span></div></div>
+    <div class="box" style="left:40px;top:192px">
+      <div class="trow win"><span class="fl">🇪🇸</span><span class="nm">إسبانيا</span><span class="seed">1H</span></div>
+      <div class="trow lose"><span class="fl">🇯🇵</span><span class="nm">اليابان</span><span class="seed">2F</span></div></div>
+    <div class="box" style="left:40px;top:344px">
+      <div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span><span class="seed">1J</span></div>
+      <div class="trow lose"><span class="fl">🇭🇷</span><span class="nm">كرواتيا</span><span class="seed">2L</span></div></div>
+    <div class="box" style="left:40px;top:496px">
+      <div class="trow win"><span class="fl">🇫🇷</span><span class="nm">فرنسا</span><span class="seed">1I</span></div>
+      <div class="trow lose"><span class="fl">🇵🇹</span><span class="nm">البرتغال</span><span class="seed">1K</span></div></div>
+
+    <!-- QF -->
+    <div class="box" style="left:360px;top:116px">
+      <div class="trow win"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div>
+      <div class="trow lose"><span class="fl">🇪🇸</span><span class="nm">إسبانيا</span></div></div>
+    <div class="box" style="left:360px;top:420px">
+      <div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div>
+      <div class="trow lose"><span class="fl">🇫🇷</span><span class="nm">فرنسا</span></div></div>
+
+    <!-- SF -->
+    <div class="box" style="left:680px;top:268px">
+      <div class="trow win"><span class="fl">🇦🇷</span><span class="nm">الأرجنتين</span></div>
+      <div class="trow lose"><span class="fl">🇧🇷</span><span class="nm">البرازيل</span></div></div>
+
+    <!-- match nodes -->
+    <div class="mnode" style="left:315px;top:141px">M89</div>
+    <div class="mnode" style="left:315px;top:445px">M92</div>
+    <div class="mnode" style="left:635px;top:293px">M97</div>
+
+    <!-- Champion -->
+    <div class="champ">
+      <div class="clab">بطل العالم</div>
+      <div class="cmed">🇦🇷</div>
+      <div class="cname">الأرجنتين</div>
+    </div>
+  </div></div>
+</body>
+</html>
