@@ -158,13 +158,40 @@ function getSheet(name) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   return ss.getSheetByName(name) || ss.insertSheet(name);
 }
+// Match key: digits only, leading zeros stripped — so a phone stored as text
+// ("0501...") and one Sheets coerced to a number ("501...") still match.
+function phoneKey(p) { return normPhone(p).replace(/^0+/, ''); }
 function findUserRow(phone) {
   const sh = getSheet(CONFIG.SHEETS.USERS);
   const last = sh.getLastRow();
   if (last < 2) return null;
   const col = sh.getRange(2, 1, last - 1, 1).getValues();
-  for (let i = 0; i < col.length; i++) if (normPhone(col[i][0]) === normPhone(phone)) return i + 2;
+  const key = phoneKey(phone);
+  for (let i = 0; i < col.length; i++) if (phoneKey(col[i][0]) === key) return i + 2;
   return null;
+}
+
+// MAINTENANCE: merge duplicate rows that share a phone. Keeps the best row
+// (a submitted one, else the richest), deletes the rest. Run once from the
+// editor, or via the ⚽ WC2026 ▸ "Clean duplicate players" menu.
+function dedupeUsers() {
+  const sh = getSheet(CONFIG.SHEETS.USERS);
+  const last = sh.getLastRow();
+  if (last < 2) return 'Nothing to clean.';
+  const rows = sh.getRange(2, 1, last - 1, 5).getValues();
+  const best = {}, del = [];
+  rows.forEach((r, i) => {
+    const rowNum = i + 2;
+    if (r[0] === '') return;
+    const key = phoneKey(r[0]);
+    const submitted = (r[2] === true || r[2] === 'TRUE');
+    const score = (submitted ? 1e7 : 0) + String(r[4] || '').length; // prefer submitted, then most data
+    if (!best[key]) { best[key] = { rowNum, score }; }
+    else if (score > best[key].score) { del.push(best[key].rowNum); best[key] = { rowNum, score }; }
+    else { del.push(rowNum); }
+  });
+  del.sort((a, b) => b - a).forEach(n => sh.deleteRow(n)); // bottom-up so indices stay valid
+  return 'Removed ' + del.length + ' duplicate row(s); kept ' + Object.keys(best).length + ' player(s).';
 }
 function readResults() {
   const sh = getSheet(CONFIG.SHEETS.RESULTS);

@@ -122,7 +122,14 @@ function onOpen() {
     .addItem('Sync results now', 'menuSyncNow')
     .addSeparator()
     .addItem('Set up daily auto-sync', 'menuSetupDaily')
+    .addItem('Clean duplicate players', 'menuDedupe')
     .addToUi();
+}
+function menuDedupe() {
+  const ui = SpreadsheetApp.getUi();
+  const r = ui.alert('Clean duplicate players?', 'Merges rows that share a phone, keeping each player\'s best row. Cannot be undone.', ui.ButtonSet.OK_CANCEL);
+  if (r !== ui.Button.OK) return;
+  ui.alert('Done', dedupeUsers(), ui.ButtonSet.OK);
 }
 function menuSetKey() {
   const ui = SpreadsheetApp.getUi();
