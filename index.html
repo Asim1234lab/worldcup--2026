@@ -268,6 +268,22 @@
   .tp-cmed.empty{background:radial-gradient(circle at 38% 32%,#26262c,#16161a);color:#44444c;box-shadow:0 0 0 2px rgba(255,255,255,.06);}
   .tp-cn{font-size:16px;font-weight:900;color:var(--gold);}
   .tp-tcap{position:absolute;width:156px;text-align:center;font-size:10px;font-weight:800;color:#C77B45;z-index:2;}
+  /* ===== LEADERBOARD ===== */
+  .head-nav{flex-wrap:wrap;}
+  .lb-load,.lb-empty{text-align:center;color:var(--muted);font-size:13px;font-weight:600;padding:34px 12px;line-height:1.6;}
+  .lb-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--black2);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;}
+  .lb-row.me{border-color:var(--gold);background:rgba(212,175,55,.08);}
+  .lb-rank{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--off);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;}
+  .lb-row.top1 .lb-rank{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#0B0B0D;}
+  .lb-row.top2 .lb-rank{background:#B8BCC8;color:#0B0B0D;}
+  .lb-row.top3 .lb-rank{background:#C77B45;color:#0B0B0D;}
+  .lb-name{font-weight:800;font-size:14px;flex:1;display:flex;align-items:center;gap:8px;min-width:0;}
+  .lb-name .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lb-you{font-size:9px;font-weight:800;letter-spacing:.06em;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:2px 6px;flex-shrink:0;}
+  .lb-pts{font-weight:900;font-size:18px;color:var(--gold);white-space:nowrap;}
+  .lb-pts small{font-size:10px;color:var(--muted);font-weight:700;margin-inline-start:3px;}
+  .lb-refresh{display:block;margin:6px auto 0;background:none;border:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.06em;padding:9px 18px;cursor:pointer;border-radius:7px;}
+  .lb-refresh:hover{border-color:var(--gold);color:var(--gold);}
 </style>
 </head>
 <body>
@@ -308,6 +324,7 @@
     <div class="head-nav">
       <button id="navBracket" class="active" onclick="setMode('bracket')">Bracket</button>
       <button id="navGroups" onclick="setMode('groups')">Group matches</button>
+      <button id="navLeaderboard" onclick="setMode('leaderboard')">Leaderboard</button>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
       <div class="user-chip"><span class="dot"></span><span id="userName"></span></div>
@@ -320,6 +337,12 @@
     <div class="stage-h"><div class="st-title">Group Match Predictions</div>
       <div class="st-hint">Pick <b>Home / Draw / Away</b> for each match. Opens 72h before kickoff, locks 15 min before.</div></div>
     <div id="groupMatchesBox"></div>
+  </section>
+
+  <!-- ===== LEADERBOARD MODE ===== -->
+  <section id="leaderboardMode" style="display:none;max-width:680px;margin:0 auto;padding:18px;">
+    <div class="stage-h"><div class="st-title">Leaderboard</div><div class="st-hint">Live standings — points update automatically as real results come in.</div></div>
+    <div id="lbBox"></div>
   </section>
 
   <!-- ===== BRACKET MODE ===== -->
@@ -859,19 +882,44 @@ function switchView(v,btn){
   if(v==='tree')renderTreePick('treeBox',false);
 }
 
+function maskMine(){ var p=String(currentPhone||''); return p.length>4?('••••'+p.slice(-3)):p; }
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+const LBL={loading:'Loading…',empty:'Leaderboard needs the shared backend.',err:"Couldn't load the leaderboard. Try again.",none:'No players yet — be the first!',you:'YOU',pts:' pts',refresh:'↻ Refresh'};
+function renderLeaderboard(){
+  var box=document.getElementById('lbBox'); if(!box) return;
+  box.innerHTML='<div class="lb-load">'+LBL.loading+'</div>';
+  if(!API.URL){ box.innerHTML='<div class="lb-empty">'+LBL.empty+'</div>'; return; }
+  fetch(API.URL+'?action=leaderboard').then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.innerHTML='<div class="lb-empty">'+LBL.err+'</div>'; return; }
+    var board=d.leaderboard||[];
+    if(!board.length){ box.innerHTML='<div class="lb-empty">'+LBL.none+'</div>'; return; }
+    var mine=maskMine(), html='';
+    board.forEach(function(p){
+      var top=(p.rank<=3)?(' top'+p.rank):'';
+      var me=(p.phone===mine)?' me':'';
+      html+='<div class="lb-row'+top+me+'">'+
+        '<span class="lb-rank">'+p.rank+'</span>'+
+        '<span class="lb-name"><span class="nm">'+escapeHtml(p.name||'Player')+'</span>'+(me?'<span class="lb-you">'+LBL.you+'</span>':'')+'</span>'+
+        '<span class="lb-pts">'+p.points+'<small>'+LBL.pts+'</small></span></div>';
+    });
+    html+='<button class="lb-refresh" onclick="renderLeaderboard()">'+LBL.refresh+'</button>';
+    box.innerHTML=html;
+  }).catch(function(){ box.innerHTML='<div class="lb-empty">'+LBL.err+'</div>'; });
+}
+
 /* ===================== MODE (bracket vs group matches) ===================== */
 let mode='bracket';
 function setMode(m){
-  if(m==='groups' && !state.submitted){
-    alert('Submit your bracket first.\n\nGroup match predictions unlock once your bracket is locked in.');
-    return;
-  }
+  if(m==='groups' && !state.submitted){ alert('Submit your bracket first.\n\nGroup match predictions unlock once your bracket is locked in.'); return; }
   mode=m;
   document.getElementById('navBracket').classList.toggle('active',m==='bracket');
   document.getElementById('navGroups').classList.toggle('active',m==='groups');
+  var nl=document.getElementById('navLeaderboard'); if(nl) nl.classList.toggle('active',m==='leaderboard');
   document.getElementById('bracketMode').style.display = m==='bracket'?'block':'none';
   document.getElementById('groupsMode').style.display = m==='groups'?'block':'none';
+  var lm=document.getElementById('leaderboardMode'); if(lm) lm.style.display = m==='leaderboard'?'block':'none';
   if(m==='groups') renderGroupMatches();
+  if(m==='leaderboard') renderLeaderboard();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function refreshNavLock(){
