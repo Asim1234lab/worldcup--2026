@@ -4,14 +4,17 @@
  *  Add this to the SAME Apps Script project as wc2026-backend.gs.
  *  It reuses that file's getSheet(), readResults() and CONFIG.
  *
- *  SETUP
- *   1. Apps Script ▸ Project Settings (⚙) ▸ Script Properties ▸ Add:
- *          APIFOOTBALL_KEY = <your api-sports key>
- *      (the key lives here, server-side — never in the public HTML)
- *   2. Run  peekApi()  once ▸ open the Execution log ▸ paste it back to
- *      verify the league id / season / field names. (No key is logged.)
- *   3. Triggers (⏰) ▸ Add Trigger ▸ function: syncGroupResults ▸
- *          time-driven ▸ Day timer (e.g. 04:00). Runs hands-off daily.
+ *  SETUP (all from a menu inside the Sheet — no settings screens needed)
+ *   1. Paste this file into the Sheet's Apps Script project, Save, then
+ *      RELOAD the Google Sheet tab. A new "⚽ WC2026" menu appears.
+ *   2. ⚽ WC2026 ▸ "Set API key…"  → paste your api-sports key (stored
+ *      privately in Script Properties — never in the public HTML).
+ *   3. ⚽ WC2026 ▸ "Verify API (peek)"  → confirms it connects; full
+ *      detail also goes to the Executions log (paste it back to verify
+ *      league id / round labels / team spellings).
+ *   4. ⚽ WC2026 ▸ "Set up daily auto-sync"  → creates the daily trigger.
+ *   5. ⚽ WC2026 ▸ "Sync results now"  → run on demand anytime (testing).
+ *  (The first menu click triggers Google's one-time permission prompt — approve it.)
  *
  *  PHASE 1 (this file): writes finished GROUP matches into the `results`
  *  tab as  A-0 | GROUP | HOME/DRAW/AWAY  — which the existing scoring and
@@ -109,4 +112,52 @@ function syncGroupResults(){
   });
   Logger.log('syncGroupResults wrote ' + wrote + ' row(s)');
   return wrote;
+}
+
+/* ============ IN-SHEET MENU (so setup is just clicks) ============ */
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('⚽ WC2026')
+    .addItem('Set API key…', 'menuSetKey')
+    .addItem('Verify API (peek)', 'menuVerify')
+    .addItem('Sync results now', 'menuSyncNow')
+    .addSeparator()
+    .addItem('Set up daily auto-sync', 'menuSetupDaily')
+    .addToUi();
+}
+function menuSetKey() {
+  const ui = SpreadsheetApp.getUi();
+  const res = ui.prompt('API-Football key', 'Paste your api-sports key:', ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  const k = (res.getResponseText() || '').trim();
+  if (!k) { ui.alert('No key entered.'); return; }
+  PropertiesService.getScriptProperties().setProperty('APIFOOTBALL_KEY', k);
+  ui.alert('✅ Key saved privately. Now run "Verify API (peek)".');
+}
+function menuVerify() {
+  const ui = SpreadsheetApp.getUi();
+  if (!afKey()) { ui.alert('Set the API key first (⚽ WC2026 ▸ Set API key…).'); return; }
+  const fx = afGet(`/fixtures?league=${AF.LEAGUE}&season=${AF.SEASON}`);
+  peekApi(); // full detail to the Executions log
+  const rounds = [...new Set((fx.response || []).map(f => f.league && f.league.round))];
+  const f0 = (fx.response || [])[0];
+  ui.alert('API check',
+    'league=' + AF.LEAGUE + ' season=' + AF.SEASON +
+    '\nfixtures returned: ' + fx.results +
+    '\nerrors: ' + JSON.stringify(fx.errors) +
+    '\n\nround labels:\n' + JSON.stringify(rounds).slice(0, 500) +
+    (f0 ? '\n\nsample: ' + f0.teams.home.name + ' vs ' + f0.teams.away.name + '  (' + (f0.league && f0.league.round) + ')' : '') +
+    '\n\nFull detail is in Apps Script ▸ Executions — copy it to your developer.',
+    ui.ButtonSet.OK);
+}
+function menuSyncNow() {
+  const ui = SpreadsheetApp.getUi();
+  if (!afKey()) { ui.alert('Set the API key first.'); return; }
+  const n = syncGroupResults();
+  ui.alert('Sync complete', 'Wrote ' + n + ' new group result row(s) to the results tab.', ui.ButtonSet.OK);
+}
+function menuSetupDaily() {
+  const ui = SpreadsheetApp.getUi();
+  ScriptApp.getProjectTriggers().forEach(t => { if (t.getHandlerFunction() === 'syncGroupResults') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('syncGroupResults').timeBased().everyDays(1).atHour(4).create();
+  ui.alert('✅ Daily auto-sync enabled', 'syncGroupResults runs automatically every day (~4 AM).', ui.ButtonSet.OK);
 }
