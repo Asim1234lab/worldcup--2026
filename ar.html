@@ -378,16 +378,19 @@
     <div class="thirds-grid" id="thirdsGrid"></div>
   </section>
 
-  <!-- STAGE 3 interactive bracket tree -->
-  <section class="stage" id="stage-3">
-    <div class="stage-h"><div class="st-title">ابنِ شجرتك</div><div class="st-hint">انقر فريقاً في أي مواجهة لاختيار الفائز — يصعد تلقائياً في الشجرة حتى البطل.</div></div>
+  <!-- STAGE 3-7 knockout -->
+  <section class="stage" id="stage-3"><div class="stage-h"><div class="st-title">دور الـ32</div><div class="st-hint">تكوّن الجدول من مجموعاتك. <b>انقر الفائز</b> في كل مواجهة.</div></div><div class="ko-grid" id="r32Grid"></div></section>
+  <section class="stage" id="stage-4"><div class="stage-h"><div class="st-title">دور الـ16</div><div class="st-hint">المتأهّلون الـ16. <b>انقر الفائز.</b></div></div><div class="ko-grid" id="r16Grid"></div></section>
+  <section class="stage" id="stage-5"><div class="stage-h"><div class="st-title">ربع النهائي</div><div class="st-hint">الفرق الثمانية. <b>انقر الفائز.</b></div></div><div class="ko-grid" id="qfGrid"></div></section>
+  <section class="stage" id="stage-6"><div class="stage-h"><div class="st-title">نصف النهائي</div><div class="st-hint">الأربعة الكبار. <b>انقر من يبلغ النهائي.</b></div></div><div class="ko-grid" id="sfGrid"></div></section>
+  <section class="stage" id="stage-7">
+    <div class="stage-h"><div class="st-title">المركز الثالث والنهائي</div><div class="st-hint">اختر صاحب <b>المركز الثالث</b> و<b>بطلك</b>، ثم أرسل.</div></div>
     <div class="warn"><span class="wi">⚠️</span><span><b>التوقّعات نهائية.</b> بمجرد الإرسال تُقفل توقّعاتك ولا يمكن تعديلها. تأكّد من رضاك عن كل اختيار.</span></div>
-    <div class="tp-tools"><button type="button" onclick="tpZoomBtn(-1)">−</button><button type="button" onclick="tpFitBtn()">⤢</button><button type="button" onclick="tpZoomBtn(1)">+</button><span class="tp-tiphint">اقرص أو انقر مزدوجاً أو استخدم ＋ / － للتكبير</span></div>
-    <div class="tp-scroll"><div class="tp-canvas" id="treePickGrid"></div></div>
+    <div class="ko-grid" id="finalGrid"></div>
   </section>
 
   <!-- STAGE 8 summary / locked -->
-  <section class="stage" id="stage-4">
+  <section class="stage" id="stage-8">
     <div class="lock-banner" id="lockBanner"></div>
     <div class="vtabs">
       <button class="vtab active" data-v="result" onclick="switchView('result',this)">توقّعاتي</button>
@@ -717,7 +720,7 @@ const winnerOf=g=>teamObj(g,0), runnerOf=g=>teamObj(g,1), thirdOf=g=>teamObj(g,2
 const sameTeam=(a,b)=>a&&b&&a.group===b.group&&a.name===b.name;
 
 /* ===================== STEPPER ===================== */
-const STEPS=['المجموعات','أفضل ثوالث','الشجرة','توقّعاتي'];
+const STEPS=['المجموعات','أفضل ثوالث','دور 32','دور 16','ربع النهائي','نصف النهائي','النهائي','توقّعاتي'];
 function renderStepper(){
   const el=document.getElementById('stepper'); el.innerHTML='';
   STEPS.forEach((nm,i)=>{ const n=i+1;
@@ -966,9 +969,13 @@ function refreshStage(){
   switch(state.stage){
     case 1:renderGroups();break;
     case 2:renderThirds();break;
-    case 3:renderTreePick('treePickGrid',!state.submitted);break;
-    case 4:
-      var u=loadUsers()[currentPhone];
+    case 3:renderKO('r32Grid',R32,r32Resolver,'R32');break;
+    case 4:renderKO('r16Grid',R16,feedResolver(),'R16');break;
+    case 5:renderKO('qfGrid',QF,feedResolver(),'QF');break;
+    case 6:renderKO('sfGrid',SF,feedResolver(),'SF');break;
+    case 7:renderKO('finalGrid',[THIRD,FINAL],finalResolver,'Final');break;
+    case 8:
+      const u=loadUsers()[currentPhone];
       document.getElementById('lockBanner').innerHTML= state.submitted
         ? `🔒 <b>توقّعاتك مقفلة.</b> لا يمكن تعديل التوقّعات بعد الإرسال. تصفّح توقّعاتك والجدول الكامل ومباريات المجموعات بالأسفل.`
         : `معاينة توقّعاتك بالأسفل.`;
@@ -978,34 +985,41 @@ function refreshStage(){
 }
 function stageComplete(){ switch(state.stage){
   case 1:return allGroupsDone(); case 2:return state.chosenThirds.length===8;
-  case 3:return finalsDone(); case 4:return true; } }
+  case 3:return r32Done(); case 4:return r16Done(); case 5:return qfDone();
+  case 6:return sfDone(); case 7:return finalsDone(); case 8:return true; } }
 function updateNav(){
   const back=document.getElementById('backBtn'),next=document.getElementById('nextBtn'),stat=document.getElementById('nstat');
   const nav=document.getElementById('navBar');
-  if(state.stage===4){ nav.style.display='none'; return; } nav.style.display='flex';
+  if(state.stage===8){ nav.style.display='none'; return; } nav.style.display='flex';
   back.style.visibility=(state.stage===1||state.submitted)?'hidden':'visible';
   next.disabled=!stageComplete();
-  if(state.stage===3){ next.textContent='🔒 إرسال التوقّعات النهائية'; next.classList.add('submit'); }
+  // turn Next into Submit on stage 7
+  if(state.stage===7){ next.textContent='🔒 إرسال التوقّعات النهائية'; next.classList.add('submit'); }
   else { next.textContent='التالي'; next.classList.remove('submit'); }
   let t='';
   switch(state.stage){
     case 1:t=`<b>${GL.filter(g=>state.order[g]&&state.order[g].length===4).length}</b> / 12 مجموعة`;break;
     case 2:t=`<b>${state.chosenThirds.length}</b> / 8 ثوالث`;break;
-    case 3:{const done=[...R32,...R16,...QF,...SF,FINAL,THIRD].filter(m=>state.winners[m.m]).length; t=`<b>${done}</b> / 32 اختيار`;}break;
+    case 3:t=`<b>${R32.filter(m=>state.winners[m.m]).length}</b> / 16`;break;
+    case 4:t=`<b>${R16.filter(m=>state.winners[m.m]).length}</b> / 8`;break;
+    case 5:t=`<b>${QF.filter(m=>state.winners[m.m]).length}</b> / 4`;break;
+    case 6:t=`<b>${SF.filter(m=>state.winners[m.m]).length}</b> / 2`;break;
+    case 7:t=`<b>${(state.winners[FINAL.m]?1:0)+(state.winners[THIRD.m]?1:0)}</b> / 2 قرار`;break;
   }
   stat.innerHTML=t;
 }
 function nextStage(){
   if(!stageComplete())return;
-  if(state.stage===3){
+  if(state.stage===7){ // SUBMIT
     showConfirm('إرسال توقّعاتك النهائية؟ هذا الإجراء دائم — لن تتمكّن من تعديل أي اختيار بعد الإرسال.', ()=>{
-      try{ state.submitted=true; state.stage=4; persist(); refreshNavLock(); showStage(); }
-      catch(e){ alert('حدث خطأ أثناء الإرسال: '+e.message); }
+      try{
+        state.submitted=true; state.stage=8; persist(); refreshNavLock(); showStage();
+      }catch(e){ alert('Something went wrong submitting: '+e.message); }
     });
     return;
   }
   if(state.stage===2) assignThirds();
-  if(state.stage<4){ state.stage++; persist(); showStage(); }
+  if(state.stage<8){ state.stage++; persist(); showStage(); }
 }
 function prevStage(){ if(state.stage>1&&!state.submitted){ state.stage--; persist(); showStage(); } }
 function resetBracket(){ showConfirm('مسح توقّعاتك والتوقّع من جديد؟ (للتجربة فقط — الدوري الحقيقي لا يسمح بذلك.)', ()=>{ state=blankBracket(); persist(); showStage(); }); }
